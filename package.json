@@ -1,0 +1,29 @@
+{
+  "name": "mongoosy",
+  "version": "1.0.0",
+  "description": "Round-trip front end mongoose.",
+  "author": "Thomas Frank <thomas@nodehill.com>",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ironboy/mongoosy.git"
+  },
+  "license": "MIT",
+  "keywords": [
+    "Mongoose",
+    "Front end",
+    "Express",
+    "middleware"
+  ],
+  "bugs": {
+    "url": "https://github.com/ironboy/mongoosy/issues"
+  },
+  "homepage": "https://github.com/ironboy/mongoosy#readme",
+  "dependencies": {
+    "express": "^4.17.1",
+    "mongoose": "^5.7.11"
+  }
+}
