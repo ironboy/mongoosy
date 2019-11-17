@@ -1,4 +1,4 @@
-const mongoosy = (() => {
+export default /*const mongoosy =*/ (() => {
 
   class GenericAwaitFuncProxy {
 
