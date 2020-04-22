@@ -103,9 +103,14 @@ class MongoosyBackend {
       query = query[part.method](...part.args);
     }
     if (query.exec) { query = query.exec(); }
-    return await query.catch(e => {
-      return { error: e + '' }
-    });
+    let result;
+    try {
+      result = await query;
+    }
+    catch (error) {
+      result = { error };
+    }
+    return result;
   }
 
   async readModels(...folderPath) {
