@@ -65,7 +65,7 @@ const {
   // Replace with names
   // of models you have defined
   // in the models folder
-  Cat
+  Cat,
   CatOwner
 } = mongoosy;
 ```
