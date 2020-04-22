@@ -88,7 +88,7 @@ async function doStuff() {
   let aCat = new Cat({ name: 'Garfield' });
   await aCat.save();
   // after saving the cat it has an id
-  console.log('aCat', anAdmin.js);
+  console.log('aCat', aCat.js);
 
   // Read all cats from the db
   let allCats= await Cat.find();
