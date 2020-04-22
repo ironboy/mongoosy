@@ -52,6 +52,9 @@ export default /*const mongoosy =*/ (() => {
       return new GenericAwaitFuncProxy(async (data, resolve) => {
         data.unshift({ model: _class.name, static: true });
         let [response, error] = await Mongoosy.fetch(data);
+        if (error) {
+          console.warn('MONGOOSY ERROR', error.error);
+        }
         let notArray = !error && response.constructor !== Array;
         notArray && (response = [response]);
         !error && (response = new _arrayClass(...response.map(x =>
@@ -115,7 +118,13 @@ export default /*const mongoosy =*/ (() => {
         let error;
         [data, error] = await Mongoosy.fetch(data);
         if (data) {
+          if (data.error) {
+            console.warn('MONGOOSY ERROR', JSON.stringify(data.error, '', '  '))
+          }
           Object.assign(this, data);
+        }
+        else if (error) {
+          console.warn('MONGOOSY ERROR', error)
         }
         resolve(error || this);
       }, this.constructor, this);
