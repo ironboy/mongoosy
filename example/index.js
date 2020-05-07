@@ -1,5 +1,5 @@
 // Change these values
-const dbName = 'mydbname';
+const dbName = 'mydbname2';
 const serverPort = 3000;
 
 const { mongoose, express, app } = require('../index')({
@@ -9,7 +9,7 @@ const { mongoose, express, app } = require('../index')({
   },
   acl: (all) => {
     console.log(all)
-    return false
+    return true;
   }
 });
 

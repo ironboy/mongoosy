@@ -1,6 +1,9 @@
-const mongoose = require('mongoose');
-const express = require('express');
 const path = require('path');
+const crypto = require('crypto');
+const express = require('express');
+const session = require('express-session');
+const mongoose = require('mongoose');
+const connectMongo = require('connect-mongo')(session);
 const app = express();
 let allModels;
 
@@ -23,7 +26,15 @@ class MongoosyBackend {
         useUnifiedTopology: true,
         useCreateIndex: true
       },
-      acl: async ({ model, instance, methods, result }) => true
+      login: {
+        pseudoModel: 'Login',
+        connectedModel: 'User',
+        passwordField: 'password',
+        encryptPassword: true,
+        encryptionSalt: 'unique and hard to guess',
+        secureSession: false // set to true if https
+      },
+      acl: async ({ user, model, instance, methods, result }) => true
     };
     // merge settings with defaults
     this.settings = Object.assign({}, defaults);
@@ -57,6 +68,13 @@ class MongoosyBackend {
     let { url } = s;
     delete s.url;
     mongoose.connect(url, s);
+    app.use(session({
+      secret: this.settings.login.encryptionSalt,
+      resave: false,
+      saveUninitialized: true,
+      cookie: { secure: this.settings.login.secureSession },
+      store: new connectMongo({ mongooseConnection: mongoose.connection })
+    }));
   }
 
   backToRegEx(val) {
@@ -72,17 +90,28 @@ class MongoosyBackend {
       let data = JSON.parse(req.body.json, (key, val) => {
         return val && val.$regex ? this.backToRegEx(val.$regex) : val;
       });
-      let result = await this.handleCall(req, res, data);
+      let result = await this.handleCall(req, data);
       res.json(result);
     });
   }
 
-  async handleCall(req, res, data) {
+  async handleCall(req, data) {
     let orgData = data.slice();
+    let model = orgData.shift().model;
+    if (model === this.settings.login.pseudoModel) {
+      return await this.loginHandler(req, data);
+    }
     let query = data[0] && this.models[data[0].model];
     let _static = data[0] && data[0].static;
     if (!query) { return { error: 'No such model' }; }
     let instanceData = !_static && data.pop().instanceData;
+    if (instanceData && model === this.settings.login.connectedModel) {
+      let pword = instanceData[this.settings.login.passwordField];
+      let alreadyEncrypted = pword.length === 64 && pword.replace(/[0-9a-f]/g, '').length === 0;
+      if (!alreadyEncrypted) {
+        instanceData[this.settings.login.passwordField] = this.encryptPassword(pword);
+      }
+    }
     if (!_static && !instanceData) { return { error: 'No instance data' }; }
     if (instanceData._id) {
       query = await query.findOne({ _id: instanceData._id });
@@ -113,12 +142,67 @@ class MongoosyBackend {
     catch (error) {
       result = { error };
     }
-    let model = orgData.shift().model;
     !_static && orgData.pop();
-    if (!(await this.settings.acl({ model, instance, methods: orgData, result }))) {
+    if (!(await this.settings.acl({ user: req.session.user, model, instance, methods: orgData, result }))) {
       return { error: 'Forbidden by ACL' };
     }
+    if (model === this.settings.login.connectedModel) {
+      // remove password field on model connected to login
+      let wasArray = result instanceof Array;
+      result = JSON.parse(JSON.stringify(result));
+      !wasArray && (result = [result]);
+      result.forEach(x => x && delete x[this.settings.login.passwordField]);
+      delete result.password;
+      !wasArray && (result = result[0]);
+    }
     return result;
+  }
+
+  async loginHandler(req, data) {
+    let _static = data[0].static;
+    let method = data[1].method;
+    let obj = data[1] && data[1].args && data[1].args[0];
+    if (!_static || !['login', 'check', 'logout'].includes(method)) {
+      return { error: 'Login only accepts the static methods login, check and logout' };
+    }
+    if (method === 'login') {
+      if (!(typeof obj === 'object')) {
+        return { error: 'Login must have an object as an argument' }
+      }
+      let password = obj[this.settings.login.passwordField];
+      if (!password) {
+        return { error: 'You must provide a password' }
+      };
+      obj[this.settings.login.passwordField] = this.encryptPassword(password);
+      let Model = this.models[this.settings.login.connectedModel];
+      if (!Model) {
+        return { error: 'Login could not find the connected model ' + this.settings.login.connectedModel };
+      }
+      let user = JSON.parse(JSON.stringify(await Model.findOne(obj)));
+      if (!user) {
+        return { error: 'No such user + password found' }
+      }
+      delete user[this.settings.login.passwordField];
+      req.session.user = user;
+      return user;
+    }
+    if (method === 'check') {
+      return req.session.user || { status: 'Not logged in' }
+    }
+    if (method == 'logout') {
+      if (req.session.user) {
+        delete req.session.user;
+        return { status: 'Logged out successfully' }
+      }
+      else {
+        return { error: 'Not logged in' }
+      }
+    }
+  }
+
+  encryptPassword(password) {
+    return crypto.createHmac('sha256', this.settings.login.encryptionSalt)
+      .update(password).digest('hex');
   }
 
   async readModels(...folderPath) {
