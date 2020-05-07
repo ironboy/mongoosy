@@ -22,20 +22,24 @@ class MongoosyBackend {
         useNewUrlParser: true,
         useUnifiedTopology: true,
         useCreateIndex: true
-      }
+      },
+      acl: async ({ model, instance, methods, result }) => true
     };
     // merge settings with defaults
     this.settings = Object.assign({}, defaults);
     for (let i in this.settings) {
       Object.assign(this.settings[i], settings[i]);
     }
+    this.settings.acl = settings.acl || this.settings.acl;
     // convert relative paths to absolute ones
     let basePath = path.dirname(process.mainModule.filename);
+    let acl = this.settings.acl;
     this.settings = JSON.parse(
       JSON.stringify(this.settings, (key, val) => {
         return key === 'path' && val.indexOf('.') === 0 ?
           path.resolve(basePath, val) : val;
       }));
+    this.settings.acl = acl;
     this.start();
   }
 
@@ -74,6 +78,7 @@ class MongoosyBackend {
   }
 
   async handleCall(req, res, data) {
+    let orgData = data.slice();
     let query = data[0] && this.models[data[0].model];
     let _static = data[0] && data[0].static;
     if (!query) { return { error: 'No such model' }; }
@@ -86,6 +91,7 @@ class MongoosyBackend {
     else if (instanceData) {
       query = new query();
     }
+    let instance = _static ? null : query;
     if (!_static) {
       Object.assign(query, instanceData);
     }
@@ -94,9 +100,6 @@ class MongoosyBackend {
       if (part.method.indexOf('find') === 0 && typeof part.args[0] === 'string') {
         part.args[0] = { _id: part.args[0] };
       }
-    }
-    if (query.acl && !(await query.acl(req, res, data))) {
-      return;
     }
     for (let part of data) {
       if (!query[part.method]) { return { error: 'No such method: ' + part.method }; }
@@ -109,6 +112,11 @@ class MongoosyBackend {
     }
     catch (error) {
       result = { error };
+    }
+    let model = orgData.shift().model;
+    !_static && orgData.pop();
+    if (!(await this.settings.acl({ model, instance, methods: orgData, result }))) {
+      return { error: 'Forbidden by ACL' };
     }
     return result;
   }

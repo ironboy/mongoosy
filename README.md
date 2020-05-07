@@ -7,7 +7,7 @@ npm i mongoosy
 ```
 
 ## Setting up the backend
-You don't have to npm install **express** and **mongoose**.Mongoosy will do that for you.
+You don't have to npm install **express** and **mongoose**. Mongoosy will do that for you.
 
 You import mongoose, express and your app (your server) from mongoosy.
 
@@ -33,7 +33,7 @@ app.listen(serverPort, () => console.log('Server listening on port ' + serverPor
 Mongoosy expect mongoose models to be stored as separate files that each export a monoogse model in a folder called **models**. 
 
 ### Default settings
-You can change which folder to look in for models and a some  other settings if you want to. These are the defaults settings used if you don't change them:
+You can change which folder to look in for models and a some other settings if you want to. These are the defaults settings used if you don't change them:
 
 ```js
 {
@@ -77,7 +77,7 @@ That's it! Now you can use your models exactly as you would on the backend (util
 ### Example
 Just a basic example - you can do so much more since you have all of Mongoose available - population and other advanced queries...
 
-**Note**: As you can see below we are asking for the property *.js* in our *console.logs*. **You should only use this in console.logs** (and you don't have to) - it just gives the log of objects and arrays that a little bit cleaner look since the objects are *proxy objects* and otherwise will be logged as such.
+**Note**: As you can see below we are asking for the property *.js* in our *console.logs*. **You should only use this in console.logs** (and you don't have to) - it just gives the log of objects and arrays a little cleaner look since the objects are *proxy objects* and otherwise will be logged as such.
 
 ```js
 async function doStuff() {
