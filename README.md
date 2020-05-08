@@ -261,8 +261,6 @@ async function addCat() {
   await listCats();
 }
 
-window.listCats = listCats;
-
 async function listCats() {
   let allCats = await Cat.find({});
   $('.cats').innerHTML = allCats.error === 'Not allowed by query ACL' ?
