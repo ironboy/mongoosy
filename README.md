@@ -123,10 +123,10 @@ async function doStuff() {
 }
 ```
 
-### Login and ACL
-Mongoosy automatically handles logins connected to a model (like User), encrypts passwords, handles sessions... A "fake model" called **Login** is always available, it has the three methods **login**, **logout** and **check** (se example code below).
+## Login and ACL
+Mongoosy automatically handles logins connected to a model (like User), encrypts passwords, handles sessions... A "fake model" called **Login** is always available, with the three methods **login**, **logout** and **check** (se example code below).
 
-It also allows ACL (Access Control List) security based on users and/or user roles.
+Mongoosy also allows andvanced **ACL (Access Control List)** security based on users and/or user roles by giving you two "hooks" you can connect to your own functions in the settings. One prevents queries to run if you return false, the other one lets you filter results. The hooks recieve detailed information about the query and the logged in user - it is up to you to setup your control structure based on this!
 
 There is a working example you can run:
 
