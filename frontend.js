@@ -76,7 +76,7 @@ export default /*const mongoosy =*/ (() => {
         body: JSON.stringify({
           json: JSON.stringify(data, (...args) => {
             let [, val] = args;
-            return val.constructor === RegExp ?
+            return val && val.constructor === RegExp ?
               { $regex: val.toString() } : val;
           })
         })

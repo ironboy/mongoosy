@@ -34,14 +34,16 @@ class MongoosyBackend {
         encryptionSalt: 'unique and hard to guess',
         secureSession: false // set to true if https
       },
-      acl: async ({ user, model, instance, methods, result }) => true
+      acl: {
+        query: ({ user, model, instance, methods }) => true,
+        result: ({ user, model, instance, methods, result }) => result
+      }
     };
     // merge settings with defaults
     this.settings = Object.assign({}, defaults);
     for (let i in this.settings) {
       Object.assign(this.settings[i], settings[i]);
     }
-    this.settings.acl = settings.acl || this.settings.acl;
     // convert relative paths to absolute ones
     let basePath = path.dirname(process.mainModule.filename);
     let acl = this.settings.acl;
@@ -121,6 +123,9 @@ class MongoosyBackend {
       query = new query();
     }
     let instance = _static ? null : query;
+    if (!(await this.settings.acl.query({ user: req.session.user, model, instance, methods: orgData.slice(0, instance ? -1 : orgData.length) }))) {
+      return { error: 'Not allowed by query ACL' };
+    }
     if (!_static) {
       Object.assign(query, instanceData);
     }
@@ -143,9 +148,6 @@ class MongoosyBackend {
       result = { error };
     }
     !_static && orgData.pop();
-    if (!(await this.settings.acl({ user: req.session.user, model, instance, methods: orgData, result }))) {
-      return { error: 'Forbidden by ACL' };
-    }
     if (model === this.settings.login.connectedModel) {
       // remove password field on model connected to login
       let wasArray = result instanceof Array;
@@ -155,6 +157,7 @@ class MongoosyBackend {
       delete result.password;
       !wasArray && (result = result[0]);
     }
+    result = await this.settings.acl.result({ user: req.session.user, model, instance, methods: orgData, result });
     return result;
   }
 
@@ -258,7 +261,8 @@ const main = (...args) => {
   return {
     mongoose: mongoose,
     express: express,
-    app: app
+    app: app,
+    pwencrypt: (pw) => backend.encryptPassword(pw)
   }
 };
 
