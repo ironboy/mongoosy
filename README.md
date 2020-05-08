@@ -140,7 +140,7 @@ This is the code used in the example:
 ### Backend code (with examples of how to use ACL)
 ```js
 const path = require('path');
-const { mongoose, express, app, pwencrypt } = require('../index')({
+const { mongoose, express, app, pwencrypt } = require('mongoosy')({
   // settings for mongoosy
   connect: {
     url: 'mongodb://localhost/login-example-db'
@@ -189,7 +189,7 @@ createGodUser();
 
 ### Frontend code (with examples of how to use Login)
 ```js
-import mongoosy from '/frontend';
+import mongoosy from 'mongoosy/frontend';
 const {
   Cat,
   Login,
