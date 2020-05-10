@@ -32,7 +32,7 @@ export default /*const mongoosy =*/ (() => {
           if (!that.mem.length && args[1] === 'then') {
             return new that.class(that.obj);
           }
-          if (that.obj && that.obj[args[1]] !== undefined) { return that.obj[args[1]]; }
+          if (that.obj && that.obj[args[1]] !== undefined || (args[1] + '').split('').pop() === '_') { return that.obj[(args[1] + '').replace(/_$/, '')]; }
           if (args[1] === 'js') { return that.obj; }
           if (args[1] === 'prototype') { return that.class.prototype; }
           that.mem.push({ method: args[1] })

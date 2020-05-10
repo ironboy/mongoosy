@@ -123,6 +123,11 @@ async function doStuff() {
 }
 ```
 
+### Gotchas: Reading a property that might be undefined
+When you are trying to read a property that might be undefined from a document you will get a Proxy object back. This is because **mongoosy** is based on Proxy-objects and has now way of knowing if you are asking for a method or a property *in the specific case when a property is undefined*.
+
+Therefore we have build in a workaround, if you aske for the property with _ (underscore) added as the last character of the property name you will get the property value or **undefined** if the property is undefined.
+
 ## Login and ACL
 Mongoosy automatically handles logins connected to a model (like User), encrypts passwords, handles sessions... A "fake model" called **Login** is always available, with the three methods **login**, **logout** and **check** (se example code below).
 
