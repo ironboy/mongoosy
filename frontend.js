@@ -5,7 +5,7 @@ export default /*const mongoosy =*/ (() => {
     constructor(resolver, _class, obj) {
       // the resolver should be a function
       // it will receive data, resolve func, reject func
-      // the _class should be a class used when
+      // the _class should be a class ussed when
       // the instance is used with new
       // obj is an obj to proxy for extra methods
       this.mem = [];
@@ -32,7 +32,7 @@ export default /*const mongoosy =*/ (() => {
           if (!that.mem.length && args[1] === 'then') {
             return new that.class(that.obj);
           }
-          if (that.obj && that.obj[args[1]]) { return that.obj[args[1]]; }
+          if (that.obj && that.obj[args[1]] !== undefined) { return that.obj[args[1]]; }
           if (args[1] === 'js') { return that.obj; }
           if (args[1] === 'prototype') { return that.class.prototype; }
           that.mem.push({ method: args[1] })
@@ -54,6 +54,9 @@ export default /*const mongoosy =*/ (() => {
         let [response, error] = await Mongoosy.fetch(data);
         if (error) {
           console.warn('MONGOOSY ERROR', error.error);
+        }
+        if (!error && !(response instanceof Object)) {
+          resolve(response);
         }
         let notArray = !error && response.constructor !== Array;
         notArray && (response = [response]);
