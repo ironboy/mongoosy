@@ -89,7 +89,7 @@ That's it! Now you can use your models exactly as you would on the backend (util
 ### Example
 Just a basic example - you can do so much more since you have all of Mongoose available - population and other advanced queries...
 
-**Note**: As you can see below we are asking for the property *.js* in our *console.logs*. **You should only use this in console.logs** (and you don't have to) - it just gives the log of objects and arrays a little cleaner look since the objects are *proxy objects* and otherwise will be logged as such.
+**Note**: As you can see below we are asking for the property *.js* in our *console.logs*. **You should only use this in console.logs and for checking properties that might be undefined** - it gives the log of objects and arrays a little cleaner look since the objects are *proxy objects* and otherwise will be logged as such.
 
 ```js
 async function doStuff() {
@@ -126,8 +126,7 @@ async function doStuff() {
 ### Gotchas: Reading a property that might be undefined
 When you are trying to read a property that might be undefined from a document you will get a Proxy object back. This is because **mongoosy** is based on Proxy-objects and has now way of knowing if you are asking for a method or a property *in the specific case when a property is undefined*.
 
-Therefore **mongoosy** have a built in workaround for this use case:
-* if you ask for a property with _ (underscore) added as the last character of the property name you will get the property value or **undefined** if the property is undefined.
+As a workaround you can use **document.js.property** this will correctly return the property value **even for undefined properties*.
 
 ## Login and ACL
 Mongoosy automatically handles logins connected to a model (like User), encrypts passwords, handles sessions... A "fake model" called **Login** is always available, with the three methods **login**, **logout** and **check** (se example code below).

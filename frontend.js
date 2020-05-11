@@ -19,6 +19,7 @@ export default /*const mongoosy =*/ (() => {
       let that = this;
       return new Proxy(!that.mem.length && that.obj ? that.obj : function (...args) {
         let last = that.mem.slice(-1)[0];
+        if (!last) { return; }
         if (last.method === 'then') {
           that.mem.pop();
           that.resolver(that.mem, ...args);
@@ -32,7 +33,7 @@ export default /*const mongoosy =*/ (() => {
           if (!that.mem.length && args[1] === 'then') {
             return new that.class(that.obj);
           }
-          if (that.obj && that.obj[args[1]] !== undefined || (args[1] + '').split('').pop() === '_') { return that.obj[(args[1] + '').replace(/_$/, '')]; }
+          if (that.obj && that.obj[args[1]] !== undefined) { return that.obj[(args[1] + '').replace(/_$/, '')]; }
           if (args[1] === 'js') { return that.obj; }
           if (args[1] === 'prototype') { return that.class.prototype; }
           that.mem.push({ method: args[1] })
