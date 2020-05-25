@@ -1,5 +1,5 @@
 const path = require('path');
-const { mongoose, express, app, pwencrypt } = require('../index')({
+const { mongoose, express, app, pwencrypt, session } = require('../index')({
   // settings for mongoosy
   connect: {
     url: 'mongodb://localhost/login-example-db'
@@ -9,6 +9,7 @@ const { mongoose, express, app, pwencrypt } = require('../index')({
     result: aclResult
   }
 });
+console.log(session);
 
 app.listen(3000, () => console.log('Server listening on port 3000'));
 app.use(express.static('www'));

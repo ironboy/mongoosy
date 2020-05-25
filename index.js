@@ -59,9 +59,9 @@ class MongoosyBackend {
   async start(settings) {
     let { expressJson, models } = this.settings;
     app.use(express.json(expressJson));
+    this.connect();
     this.models = await this.readModels(models.path);
     allModels = this.models;
-    this.connect();
     this.addRoute();
   }
 
@@ -70,13 +70,14 @@ class MongoosyBackend {
     let { url } = s;
     delete s.url;
     mongoose.connect(url, s);
-    app.use(session({
+    this.initedSession = session({
       secret: this.settings.login.encryptionSalt,
       resave: false,
       saveUninitialized: true,
       cookie: { secure: this.settings.login.secureSession },
       store: new connectMongo({ mongooseConnection: mongoose.connection })
-    }));
+    });
+    app.use(this.initedSession);
   }
 
   backToRegEx(val) {
@@ -262,7 +263,8 @@ const main = (...args) => {
     mongoose: mongoose,
     express: express,
     app: app,
-    pwencrypt: (pw) => backend.encryptPassword(pw)
+    pwencrypt: (pw) => backend.encryptPassword(pw),
+    session: backend.initedSession
   }
 };
 

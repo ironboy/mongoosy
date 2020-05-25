@@ -20,7 +20,7 @@ You also need to start the app (the server) on a port of your choice.
 const dbName = 'mydbname';
 const serverPort = 3000;
 
-const { mongoose, express, app, pwencrypt } = require('mongoosy')({
+const { mongoose, express, app, pwencrypt, session } = require('mongoosy')({
   // settings for mongoosy
   connect: {
     url: 'mongodb://localhost/' + dbName
@@ -31,6 +31,14 @@ app.listen(serverPort, () => console.log('Server listening on port ' + serverPor
 ```
 
 Mongoosy expect mongoose models to be stored as separate files that each export a monoogse model in a folder called **models**. 
+
+###  What you require
+You get actually require five different things when requiring **mongoosy**:
+* mongoose - the mongoose module - if you should need to use it directly somewhere in your code
+* **express** - the express module - if you should need to use it directly somewhere in your code
+* **app** - the express server created by mongoosy - you can add your own routes, middleware etc to it if needed
+* **pwencrypt** - an encryption function for passwords. Use it to encrypt the passwords if you create any users on the backend.
+* **session** - session middleware function created by the *express-session* module, use it for things like integrating your sessions with sockets (via a module like [express-socket.io-session](https://www.npmjs.com/package/express-socket.io-session)).
 
 ### Default settings
 You can change which folder to look in for models and a some other settings if you want to. These are the defaults settings used if you don't change them:
