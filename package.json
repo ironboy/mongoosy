@@ -1,6 +1,6 @@
 {
   "name": "mongoosy",
-  "version": "1.0.15",
+  "version": "1.0.16",
   "description": "Round-trip front end mongoose.",
   "author": "Thomas Frank <thomas@nodehill.com>",
   "main": "index.js",
