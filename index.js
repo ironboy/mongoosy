@@ -108,7 +108,7 @@ class MongoosyBackend {
     let _static = data[0] && data[0].static;
     if (!query) { return { error: 'No such model' }; }
     let instanceData = !_static && data.pop().instanceData;
-    if (instanceData && model === this.settings.login.connectedModel && instanceData[this.settings.login.passwordField]) {
+    if (instanceData && model === this.settings.login.connectedModel && instanceData.hasOwnProperty(this.settings.login.passwordField)) {
       let pword = instanceData[this.settings.login.passwordField];
       let alreadyEncrypted = pword.length === 64 && pword.replace(/[0-9a-f]/g, '').length === 0;
       if (!alreadyEncrypted) {
